@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaloGlass AI</title>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  background:#050510;
+  color:white;
+  text-align:center;
+}
+
+h1 {
+  color:#00eaff;
+  margin-top:20px;
+}
+
+input {
+  width:80%;
+  padding:15px;
+  border:none;
+  border-radius:10px;
+  margin-top:20px;
+}
+
+button {
+  margin-top:15px;
+  padding:15px;
+  border:none;
+  border-radius:10px;
+  background:#00eaff;
+  color:black;
+  font-weight:bold;
+}
+
+#output {
+  margin-top:20px;
+  padding:15px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>HaloGlass AI 👓</h1>
+
+<input id="prompt" placeholder="Describe your app...">
+
+<br>
+
+<button onclick="generate()">Generate App</button>
+
+<div id="output"></div>
+
+<script>
+function generate() {
+  const input = document.getElementById("prompt").value;
+
+  document.getElementById("output").innerHTML =
+    "AI created: <br><br>" +
+    "<b>" + input + "</b><br><br>" +
+    "→ (Simulated app running)";
+}
+</script>
+
+</body>
+</html>
