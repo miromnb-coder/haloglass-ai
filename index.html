@@ -8,7 +8,7 @@
 body {
   margin:0;
   font-family:Arial;
-  background:#050510;
+  background: radial-gradient(circle at top, #0a0a1a, #000);
   color:white;
   text-align:center;
 }
@@ -24,21 +24,40 @@ input {
   border:none;
   border-radius:10px;
   margin-top:20px;
+  background:#111;
+  color:white;
 }
 
 button {
-  margin-top:15px;
-  padding:15px;
+  margin:10px;
+  padding:12px 15px;
   border:none;
   border-radius:10px;
   background:#00eaff;
   color:black;
   font-weight:bold;
+  box-shadow:0 0 15px #00eaff;
+  transition:0.2s;
+}
+
+button:hover {
+  transform:scale(1.05);
 }
 
 #output {
   margin-top:20px;
   padding:15px;
+  white-space:pre-wrap;
+}
+
+#preview {
+  width:90%;
+  height:300px;
+  border:none;
+  border-radius:20px;
+  background: rgba(0,255,255,0.05);
+  box-shadow:0 0 25px #00eaff;
+  margin-top:20px;
 }
 </style>
 </head>
@@ -47,22 +66,84 @@ button {
 
 <h1>HaloGlass AI 👓</h1>
 
-<input id="prompt" placeholder="Describe your app...">
+<input id="prompt" placeholder="Describe your Smart Glass App">
 
 <br>
 
-<button onclick="generate()">Generate App</button>
+<button onclick="startVoice()">🎤 Puhu</button>
+<button onclick="generate()">⚡ Generate</button>
+<button onclick="runApp()">▶️ Run App</button>
+
+<br>
+
+<button onclick="quick('Create AR navigation')">AR</button>
+<button onclick="quick('Create voice assistant')">Voice</button>
+<button onclick="quick('Create HUD overlay')">HUD</button>
 
 <div id="output"></div>
 
+<iframe id="preview"></iframe>
+
 <script>
-function generate() {
+let recognition;
+let lastCode = "";
+let apps = JSON.parse(localStorage.getItem("apps") || "[]");
+
+if ('webkitSpeechRecognition' in window) {
+  recognition = new webkitSpeechRecognition();
+  recognition.lang = "fi-FI";
+
+  recognition.onresult = function(event) {
+    const text = event.results[0][0].transcript;
+    document.getElementById("prompt").value = text;
+    generate();
+  };
+}
+
+function startVoice() {
+  if (recognition) recognition.start();
+}
+
+function quick(text) {
+  document.getElementById("prompt").value = text;
+  generate();
+}
+
+async function generate() {
   const input = document.getElementById("prompt").value;
 
-  document.getElementById("output").innerHTML =
-    "AI created: <br><br>" +
-    "<b>" + input + "</b><br><br>" +
-    "→ (Simulated app running)";
+  document.getElementById("output").innerHTML = "AI thinking...";
+
+  try {
+    const res = await fetch("/.netlify/functions/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt: input })
+    });
+
+    const data = await res.json();
+    const text = data.choices[0].message.content;
+
+    lastCode = text;
+
+    document.getElementById("output").innerText = text;
+
+    saveApp(text);
+
+  } catch (e) {
+    document.getElementById("output").innerText = "Error: " + e.message;
+  }
+}
+
+function runApp() {
+  document.getElementById("preview").srcdoc = lastCode;
+}
+
+function saveApp(code) {
+  apps.push(code);
+  localStorage.setItem("apps", JSON.stringify(apps));
 }
 </script>
 
